@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// 1. 生成器配置：定义如何生成 Prisma 客户端
+
+generator client {
+  provider = "prisma-client"  // 使用 JavaScript 客户端
+  output   = "../src/generated/prisma"  // 客户端输出位置
+}
+
+
+// 2. 数据源配置：定义数据库连接
+
+datasource db {
+  provider = "postgresql" // 数据库类型
+}
+
+
+// 3. 数据模型定义：定义数据库表结构
+
+model Post {
+  id        String    @id @default(cuid())
+  title     String
+  summary   String
+  content   String
+  tags      String[]
+  category  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+
+// 示例：创建一个评论表
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  author    String
+  postId    String    @relation(fields: [postId], references: [id])
+  post      Post      @relation(fields: [postId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
