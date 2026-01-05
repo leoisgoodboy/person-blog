@@ -1,13 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useContractWrite, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
-
-
-// useWriteContract 钩子允许对智能合约数据进行修改
-// useWaitForTransactionReceipt 会等待交易被添加到区块中并且返回交易信息
-// useAccount获取已经链接的数据
 
 const CONTRACT_ADDRESS = '0x674149df6EE1c9D6c2Ace2650F5D38F594b1F266' as const;
 
@@ -45,22 +40,20 @@ export default function DonateButton() {
   const [amount, setAmount] = useState('0.01');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data: hash, writeContract, isPending } = useWriteContract();
+  const { data, writeContractAsync, isPending: isWriteLoading } = useContractWrite();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
+    hash: data,
   });
 
   const handleDonate = async () => {
     try {
-      // 执行合约上的写入操作
-      writeContract({
+      await writeContractAsync?.({
         address: CONTRACT_ADDRESS,
         abi: CONTRACT_ABI,
         functionName: 'donate',
-        value: parseEther(amount),  // parseEther把“人类可读的 ETH 数量”转成“链上使用的 wei（BigInt）”
+        value: parseEther(amount),
       });
-      // 为什么一定要用parseEther？  Solidity / EVM 不认识小数；链上统一使用 wei；JS 的 number 精度不安全
     } catch (error) {
       console.error('捐赠失败:', error);
       alert('捐赠失败，请检查控制台获取详细信息');
@@ -109,10 +102,10 @@ export default function DonateButton() {
                 <div className="flex gap-3">
                   <button
                     onClick={handleDonate}
-                    disabled={isPending || isConfirming}
+                    disabled={isWriteLoading || isConfirming}
                     className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isPending || isConfirming ? '处理中...' : '确认捐赠'}
+                    {isWriteLoading || isConfirming ? '处理中...' : '确认捐赠'}
                   </button>
                   <button
                     onClick={() => setIsModalOpen(false)}
