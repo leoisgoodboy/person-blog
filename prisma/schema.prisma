@@ -25,6 +25,7 @@ model Post {
   content   String
   tags      String[]
   category  String
+  comments  Comment[] // 反向关系：一个Post可以有多个Comment
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -35,7 +36,7 @@ model Comment {
   id        String    @id @default(cuid())
   content   String
   author    String
-  postId    String    @relation(fields: [postId], references: [id])
+  postId    String
   post      Post      @relation(fields: [postId], references: [id])
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

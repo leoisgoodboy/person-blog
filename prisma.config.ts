@@ -6,7 +6,7 @@ import { defineConfig, env } from "prisma/config";
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    // 直接使用完整的连接字符串，包含正确的SSL参数
-    url: "postgresql://postgres:FAquLMGU8TNYAk3Q@db.nswxafyljltfykutpgqw.supabase.co:5432/postgres?sslmode=require",
+    // 使用环境变量中的数据库连接字符串
+    url: env("DATABASE_URL"),
   },
 });

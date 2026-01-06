@@ -1,17 +1,20 @@
 import { PrismaClient } from '../generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { parse } from 'pg-connection-string';
 
-// 直接使用连接参数配置Pool，确保SSL选项正确设置
+// 解析DATABASE_URL环境变量
+const connectionString = process.env.DATABASE_URL || '';
+const parsed = parse(connectionString);
+
+// 使用解析后的参数配置Pool，确保SSL选项正确设置并处理null值
 const pool = new Pool({
-  host: 'db.nswxafyljltfykutpgqw.supabase.co',
-  user: 'postgres',
-  password: 'FAquLMGU8TNYAk3Q',
-  database: 'postgres',
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false, // 关键：绕过自签名证书验证
-  },
+  host: parsed.host || undefined,
+  user: parsed.user || undefined,
+  password: parsed.password || undefined,
+  database: parsed.database || undefined,
+  port: parsed.port ? parseInt(parsed.port) : 5432,
+  ssl: parsed.ssl ? { rejectUnauthorized: false } : false,
 });
 
 // 创建PrismaPg适配器
